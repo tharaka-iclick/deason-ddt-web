@@ -1,0 +1,52 @@
+@import "~@joint/plus/joint-plus.css";
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#stencil-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 240px;
+  bottom: 0;
+}
+
+#paper-container {
+  position: absolute;
+  right: 0;
+  top: 0;
+  left: 240px;
+  bottom: 0;
+}
+
+#toolbar {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  background: #f0f0f0;
+  z-index: 1000;
+  padding: 5px;
+}
+
+.joint-toolbar {
+  display: flex !important;
+  align-items: center;
+}
+
+.joint-toolbar button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  background: #0075f2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.joint-toolbar button:hover {
+  background: #005bb5;
+}

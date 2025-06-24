@@ -1,0 +1,16 @@
+.scada-pnid-container {
+  width: 100%;
+  height: 100vh;
+}
+
+.scada-pnid-container > div {
+  box-sizing: border-box;
+}
+
+.joint-paper {
+  border: 1px solid #ccc; /* Optional: Visible border for paper */
+}
+
+.joint-stencil {
+  background: #f0f0f0;
+}
