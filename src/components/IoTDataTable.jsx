@@ -1,328 +1,1067 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TablePagination,
-  CircularProgress,
-  Alert,
-  Box,
-  Typography,
-} from "@mui/material";
-import { db } from "../firebase";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  limit,
-  startAfter,
-  getDocs,
-} from "firebase/firestore";
+  dia,
+  ui,
+  shapes,
+  util,
+  layout,
+  highlighters,
+  elementTools,
+  format,
+} from "@joint/plus";
 
-const DeviceSVG = ({ data }) => {
-  if (!data) return <p>No data yet...</p>;
+// Turbine metrics
+const r = 16;
+const a = 3;
+const b = 4;
 
-  const { deviceId, sensorData, location, receivedAt, networkData } = data;
+// Custom view flags
+const POWER_FLAG = "POWER";
+const LIGHT_FLAG = "LIGHT";
 
-  return (
-    <svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="500" height="300" fill="#f5f5f5" stroke="#ccc" />
-      <text x="20" y="30" fontSize="18" fontWeight="bold" fill="#333">
-        Device Data Overview
-      </text>
-      <rect
-        x="20"
-        y="50"
-        width="460"
-        height="200"
-        fill="#fff"
-        stroke="#999"
-        rx="10"
-      />
+class Generator extends dia.Element {
+  defaults() {
+    return {
+      ...super.defaults,
+      type: "Generator",
+      size: {
+        width: 60,
+        height: 80,
+      },
+      power: 0,
+      attrs: {
+        root: {
+          magnetSelector: "body",
+        },
+        body: {
+          width: "calc(w)",
+          height: "calc(h)",
+          stroke: "#7f4439",
+          strokeWidth: 2,
+          fill: "#945042",
+          rx: 5,
+          ry: 5,
+        },
+        label: {
+          text: "Generator",
+          textAnchor: "middle",
+          textVerticalAnchor: "top",
+          x: "calc(0.5*w)",
+          y: "calc(h+10)",
+          fontSize: "14",
+          fontFamily: "sans-serif",
+          fill: "#350100",
+        },
+        generatorGroup: {
+          transform: "translate(calc(w/2),calc(h/2))",
+          event: "element:power:click",
+          cursor: "pointer",
+        },
+        generatorBackground: {
+          r: 24,
+          fill: "#350100",
+          stroke: "#a95b4c",
+          strokeWidth: 2,
+        },
+        generator: {
+          d: `M ${a} ${a} ${b} ${r} -${b} ${r} -${a} ${a} -${r} ${b} -${r} -${b} -${a} -${a} -${b} -${r} ${b} -${r} ${a} -${a} ${r} -${b} ${r} ${b} Z`,
+          stroke: "#a95b4c",
+          strokeWidth: 2,
+          fill: "#c99287",
+        },
+      },
+    };
+  }
 
-      <text x="40" y="80" fontSize="14" fill="#333">
-        📟 Device ID: {deviceId}
-      </text>
-      <text x="40" y="105" fontSize="14" fill="#333">
-        🌡️ Temperature: {sensorData?.temperature ?? "N/A"}°C
-      </text>
-      <text x="40" y="130" fontSize="14" fill="#333">
-        📡 RSSI: {networkData?.rssi ?? "N/A"} dBm | SNR:{" "}
-        {networkData?.snr ?? "N/A"}
-      </text>
-      <text x="40" y="155" fontSize="14" fill="#333">
-        🗺️ Location: Lat {location?.latitude?.toFixed(4)}, Lon{" "}
-        {location?.longitude?.toFixed(4)}
-      </text>
-      <text x="40" y="180" fontSize="14" fill="#333">
-        🕓 Time: {new Date(receivedAt).toLocaleString()}
-      </text>
-      <text x="40" y="205" fontSize="14" fill="#333">
-        📶 Frequency: {Number(networkData?.frequency) / 1e6} MHz | SF:{" "}
-        {networkData?.dataRate?.lora?.spreading_factor}
-      </text>
-      {/* <rect
-        width="100"
-        height="100"
-        rx="0"
-        fill="none"
-        stroke="#ccc"
-        stroke-width="2"
-      />
-      <path
-        d="M66.868 25.074a1.752 1.752 0 0 0-.645-1.072c-2.852-2.356-6.806-2.198-11.864.476-.33-.33-.688-.61-1.088-.85 3.486-3.127 6.663-4.44 9.533-3.939.846.148 1.431-.821.907-1.502a16.52 16.52 0 0 0-4.079-3.787 1.753 1.753 0 0 0-1.213-.302c-3.683.35-6.368 3.258-8.054 8.725-.467 0-.917.056-1.37.169.254-4.677 1.573-7.852 3.956-9.526.703-.494.431-1.593-.42-1.704a16.519 16.519 0 0 0-5.563.206 1.752 1.752 0 0 0-1.071.645c-2.357 2.852-2.199 6.806.475 11.864-.33.33-.61.688-.85 1.088-3.127-3.486-4.44-6.664-3.939-9.533.148-.846-.821-1.432-1.501-.907a16.517 16.517 0 0 0-3.788 4.079 1.753 1.753 0 0 0-.302 1.213c.35 3.683 3.259 6.368 8.726 8.054 0 .467.055.916.168 1.37-4.676-.254-7.851-1.573-9.526-3.956-.493-.703-1.593-.431-1.704.42a16.519 16.519 0 0 0 .207 5.563c.093.453.288.777.644 1.071 2.852 2.357 6.807 2.199 11.865-.475.33.33.687.61 1.087.85-3.486 3.127-6.663 4.44-9.532 3.939-.846-.148-1.432.821-.908 1.501a16.52 16.52 0 0 0 4.08 3.788c.386.255.752.346 1.213.302 3.683-.35 6.367-3.259 8.053-8.725a5.58 5.58 0 0 0 1.37-.17c-.254 4.677-1.572 7.853-3.956 9.527-.702.494-.431 1.593.42 1.704 1.89.245 3.696.178 5.563-.207a1.752 1.752 0 0 0 1.072-.644c2.356-2.852 2.198-6.806-.476-11.865.33-.33.61-.687.85-1.087 3.127 3.486 4.44 6.663 3.939 9.533-.148.845.821 1.431 1.501.907a16.518 16.518 0 0 0 3.788-4.08c.255-.386.346-.752.302-1.213-.35-3.683-3.259-6.367-8.725-8.053 0-.467-.056-.917-.169-1.37 4.676.254 7.852 1.572 9.526 3.956.494.702 1.593.431 1.704-.42.245-1.89.178-3.696-.206-5.563zm-16.503 8.103a4.706 4.706 0 1 1 0-9.412 4.706 4.706 0 0 1 0 9.412z"
-        fill="#7d081e"
-      />
-      <text
-        x="49.434"
-        y="59.465"
-        dominant-baseline="middle"
-        fill="#000000"
-        text-anchor="middle"
-      >
-        <tspan> 🌡️ Temperature: {sensorData?.temperature ?? "N/A"}°C</tspan>
-      </text>
-      <g transform="matrix(1.61104 0 0 1.60957 -72.338 -20.652)">
-        <rect
-          x="54.702"
-          y="60.372"
-          width="14.263"
-          height="7.426"
-          rx="1.5"
-          fill="#12ed19"
-          stroke="#000"
-        />
-        <text
-          x="61.856"
-          y="64.491"
-          dominant-baseline="middle"
-          fill="#000000"
-          font-family="Roboto"
-          font-size="4.446"
-          stroke-width=".741"
-          text-anchor="middle"
-        >
-          <tspan stroke-width=".741">On</tspan>
-        </text>
-      </g>
-      <g transform="matrix(1.61253 0 0 1.61566 -58.441 -20.942)">
-        <rect
-          x="74.367"
-          y="60.311"
-          width="14.263"
-          height="7.426"
-          rx="1.5"
-          fill="#ed121f"
-          stroke="#000"
-        />
-        <text
-          x="81.366"
-          y="64.518"
-          dominant-baseline="middle"
-          fill="#000000"
-          font-family="Roboto"
-          font-size="4.446"
-          stroke-width=".741"
-          text-anchor="middle"
-        >
-          <tspan stroke-width=".741">Off</tspan>
-        </text>
-      </g> */}
-    </svg>
-  );
-};
+  get power() {
+    return Math.round(this.get("power") * 100);
+  }
 
-const IoTDataTable = () => {
-  const [data, setData] = useState([]);
-  const [latestData, setLatestData] = useState(null);
-  const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastUpdated, setLastUpdated] = useState(null);
-  const [lastDoc, setLastDoc] = useState(null); // For pagination
+  preinitialize() {
+    this.markup = util.svg`
+          <rect @selector="body" />
+          <g @selector="generatorGroup">
+            <circle @selector="generatorBackground" />
+            <path @selector="generator" />
+          </g>
+          <text @selector="label" />
+        `;
+  }
+}
+
+const GeneratorView = dia.ElementView.extend({
+  presentationAttributes: dia.ElementView.addPresentationAttributes({
+    power: [POWER_FLAG],
+  }),
+
+  initFlag: [dia.ElementView.Flags.RENDER, POWER_FLAG],
+
+  powerAnimation: null,
+
+  confirmUpdate(...args) {
+    let flags = dia.ElementView.prototype.confirmUpdate.call(this, ...args);
+    if (this.hasFlag(flags, POWER_FLAG)) {
+      this.togglePower();
+      flags = this.removeFlag(flags, POWER_FLAG);
+    }
+    return flags;
+  },
+
+  getSpinAnimation() {
+    let { spinAnimation } = this;
+    if (spinAnimation) return spinAnimation;
+    const [generatorEl] = this.findBySelector("generator");
+    // It's important to use start and end frames to make it work in Safari.
+    const keyframes = { transform: ["rotate(0deg)", "rotate(360deg)"] };
+    spinAnimation = generatorEl.animate(keyframes, {
+      fill: "forwards",
+      duration: 1000,
+      iterations: Infinity,
+    });
+    this.spinAnimation = spinAnimation;
+    return spinAnimation;
+  },
+
+  togglePower() {
+    const { model } = this;
+    const playbackRate = model.get("power");
+    this.getSpinAnimation().playbackRate = playbackRate;
+  },
+});
+
+class Bulb extends dia.Element {
+  defaults() {
+    return {
+      ...super.defaults,
+      type: "Bulb",
+      size: {
+        width: 28,
+        height: 30,
+      },
+      attrs: {
+        root: {
+          magnetSelector: "glass",
+        },
+        cap1: {
+          y: "calc(h + 1)",
+          x: "calc(w / 2 - 6)",
+          width: 12,
+        },
+        cap2: {
+          y: "calc(h + 5)",
+          x: "calc(w / 2 - 5)",
+          width: 10,
+        },
+        cap: {
+          fill: "#350100",
+          height: 3,
+        },
+        glass: {
+          fill: "#f1f5f7",
+          stroke: "#659db3",
+          refD: "M 14.01 0 C 3.23 0.01 -3.49 11.68 1.91 21.01 C 2.93 22.78 4.33 24.31 6.01 25.48 L 6.01 32 L 22.01 32 L 22.01 25.48 C 30.85 19.31 29.69 5.89 19.93 1.32 C 18.08 0.45 16.06 0 14.01 0 Z",
+        },
+        label: {
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          x: "calc(w / 2)",
+          y: "calc(h / 2)",
+          fontSize: 7,
+          fontFamily: "sans-serif",
+          fill: "#350100",
+        },
+      },
+    };
+  }
+
+  preinitialize() {
+    this.markup = util.svg`
+          <rect @selector="cap1" @group-selector="cap"/>
+          <rect @selector="cap2" @group-selector="cap"/>
+          <path @selector="glass"/>
+          <text @selector="label" />
+        `;
+  }
+
+  static create(watts = 100) {
+    return new this({
+      watts: watts,
+      attrs: {
+        label: {
+          text: `${watts} W`,
+        },
+      },
+    });
+  }
+}
+
+const BulbView = dia.ElementView.extend({
+  presentationAttributes: dia.ElementView.addPresentationAttributes({
+    light: [LIGHT_FLAG],
+  }),
+
+  initFlag: [dia.ElementView.Flags.RENDER, LIGHT_FLAG],
+
+  glassAnimation: null,
+
+  confirmUpdate(...args) {
+    let flags = dia.ElementView.prototype.confirmUpdate.call(this, ...args);
+    if (this.hasFlag(flags, LIGHT_FLAG)) {
+      // Delay the light toggle to ensure elements are rendered
+      setTimeout(() => this.toggleLight(), 50);
+      flags = this.removeFlag(flags, LIGHT_FLAG);
+    }
+    return flags;
+  },
+
+  getGlassAnimation() {
+    let { glassAnimation } = this;
+    if (glassAnimation) return glassAnimation;
+    const [glassEl] = this.findBySelector("glass");
+    const keyframes = {
+      stroke: ["#edbc26"],
+      fill: ["#f5e5b7"],
+      strokeWidth: [2],
+    };
+    glassAnimation = glassEl.animate(keyframes, {
+      fill: "forwards",
+      duration: 500,
+      iterations: 1,
+    });
+    this.glassAnimation = glassAnimation;
+    return glassAnimation;
+  },
+
+  toggleLight() {
+    const { model } = this;
+    const state = model.get("light") ? 1 : -1;
+    this.getGlassAnimation().playbackRate = state;
+  },
+});
+
+class Wire extends dia.Link {
+  defaults() {
+    return {
+      ...super.defaults,
+      type: "Wire",
+      z: -1,
+      attrs: {
+        line: {
+          connection: true,
+          stroke: "#346f83",
+          strokeWidth: 2,
+          strokeLinejoin: "round",
+          strokeLinecap: "round",
+        },
+        outline: {
+          connection: true,
+          stroke: "#004456",
+          strokeWidth: 4,
+          strokeLinejoin: "round",
+          strokeLinecap: "round",
+        },
+      },
+    };
+  }
+
+  preinitialize() {
+    this.markup = util.svg`
+          <path @selector="outline" fill="none"/>
+          <path @selector="line" fill="none"/>
+        `;
+  }
+}
+
+const StatusEffect = dia.HighlighterView.extend({
+  UPDATE_ATTRIBUTES: ["power"],
+  tagName: "circle",
+  attributes: {
+    r: 5,
+    stroke: "white",
+    event: "element:power:click",
+    cursor: "pointer",
+  },
+  highlight: function (cellView) {
+    const { vel } = this;
+    const { model } = cellView;
+    const { width, height } = model.size();
+    const power = model.get("power");
+    vel.attr("fill", power === 0 ? "#ed4912" : "#65b374");
+    vel.attr("cx", width - 10);
+    vel.attr("cy", height - 10);
+  },
+});
+
+const PlaybackRateEffect = dia.HighlighterView.extend({
+  UPDATE_ATTRIBUTES: ["power"],
+  tagName: "text",
+  attributes: {
+    r: 5,
+    fill: "white",
+    "font-size": 7,
+    "font-family": "sans-serif",
+    "text-anchor": "end",
+  },
+  highlight: function (cellView) {
+    const { vel } = this;
+    const { model } = cellView;
+    const { width, height } = model.size();
+    const { power } = model;
+    let text;
+    switch (power) {
+      case 0:
+        text = "Off";
+        break;
+      case 100:
+        text = "On";
+        break;
+      case 400:
+        text = "Max";
+        break;
+      default:
+        text = `${power} %`;
+    }
+    vel.attr("x", width - 18);
+    vel.attr("y", height - 5);
+    vel.text(text, { textVerticalAnchor: "bottom" });
+  },
+});
+
+const GeneratorCircuit = () => {
+  const paperContainerRef = useRef(null);
+  const [powerLevel, setPowerLevel] = useState(1);
+  const [graph, setGraph] = useState(null);
+  const [generator, setGenerator] = useState(null);
+  const canvas = useRef(null);
 
   useEffect(() => {
-    setLoading(true);
-    if (!db) {
-      console.error("Firestore db is not initialized");
-      setError("Firestore is not properly initialized.");
-      setLoading(false);
-      return;
-    }
+    // if (!paperContainerRef.current) return;
 
-    // Create Firestore query
-    const q = query(
-      collection(db, "iot_data"),
-      orderBy("createdAt", "desc"),
-      limit(rowsPerPage)
-    );
+    const namespace = {
+      ...shapes,
+      Generator,
+      GeneratorView,
+      Bulb,
+      BulbView,
+      Wire,
+    };
 
-    // Set up real-time listener
-    const unsubscribe = onSnapshot(
-      q,
-      async (snapshot) => {
-        try {
-          if (!snapshot || snapshot.empty) {
-            console.warn("Firestore snapshot is empty or undefined");
-            setData([]);
-            setError("No data available in Firestore.");
-            setLoading(false);
-            return;
-          }
+    // const newGraph = new dia.Graph(
+    //   {},
+    //   {
+    //     cellNamespace: namespace,
+    //   }
+    // );
 
-          // Process documents
-          const docs = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          console.log("Fetched docs:", JSON.stringify(docs, null, 2)); // Detailed debug log
-          setData(docs);
-          setLatestData(docs[0]);
-          setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
-
-          // Get total count
-          const totalSnapshot = await await getDocs(collection(db, "iot_data"));
-          console.log("Total documents:", totalSnapshot.size);
-          setTotal(totalSnapshot.size || 0);
-
-          setLastUpdated(new Date().toLocaleString());
-          setError(null);
-          setLoading(false);
-        } catch (err) {
-          console.error(
-            "Error processing Firestore snapshot:",
-            err.message,
-            err.stack
-          );
-          setError(`Failed to fetch data: ${err.message}`);
-          setData([]);
-          setLoading(false);
-        }
-      },
-      (err) => {
-        console.error("Firestore listener error:", err.message, err.stack);
-        setError(`Error setting up real-time listener: ${err.message}`);
-        setData([]);
-        setLoading(false);
+    const graph = new dia.Graph(
+      {},
+      {
+        cellNamespace: namespace,
       }
     );
 
-    // Cleanup listener on unmount
-    return () => unsubscribe();
-  }, [rowsPerPage]);
+    const paper = new dia.Paper({
+      model: graph,
+      background: {
+        color: "#F8F9FA",
+      },
+      frozen: true,
+      async: true,
+      cellViewNamespace: shapes,
+    });
 
-  // Handle pagination
-  const handleChangePage = async (event, newPage) => {
-    setLoading(true);
-    try {
-      const q = query(
-        collection(db, "iot_data"),
-        orderBy("createdAt", "desc"),
-        startAfter(newPage > page ? lastDoc : null),
-        limit(rowsPerPage)
-      );
+    const scroller = new ui.PaperScroller({
+      paper,
+      autoResizePaper: true,
+      cursor: "grab",
+    });
 
-      const snapshot = await new Promise((resolve) => {
-        onSnapshot(q, resolve, (err) => {
-          console.error("Pagination query error:", err.message, err.stack);
-          setError(`Failed to fetch page data: ${err.message}`);
-          setData([]);
-          setLoading(false);
-        });
-      });
+    canvas.current?.appendChild(scroller.el);
+    scroller.render().center();
 
-      const docs = snapshot.docs
-        ? snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-        : [];
-      console.log("Paginated docs:", JSON.stringify(docs, null, 2));
-      setData(docs);
-      setLastDoc(snapshot.docs[snapshot.docs.length - 1] || null);
-      setPage(newPage);
-      setLastUpdated(new Date().toLocaleString());
-      setLoading(false);
-    } catch (err) {
-      console.error("Error fetching page:", err.message, err.stack);
-      setError(`Failed to fetch page data: ${err.message}`);
-      setData([]);
-      setLoading(false);
+    const rect = new shapes.standard.Rectangle({
+      position: { x: 100, y: 100 },
+      size: { width: 100, height: 50 },
+      attrs: {
+        label: {
+          text: "Hello World",
+        },
+      },
+    });
+
+    graph.addCell(rect);
+    paper.unfreeze();
+
+    // paperContainerRef.current.appendChild(paper.el);
+
+    const newGenerator = new Generator({
+      position: { x: 50, y: 50 },
+    });
+
+    const setPlaybackRate = (playbackRate) => {
+      newGenerator.set("power", playbackRate);
+      setPowerLevel(playbackRate);
+    };
+
+    paper.on("element:power:click", ({ model }, evt) => {
+      evt.stopPropagation();
+      const playbackRate = model.get("power") ? 0 : 1;
+      setPlaybackRate(playbackRate);
+    });
+
+    const bulb1 = Bulb.create(100).position(150, 45);
+    const bulb2 = Bulb.create(40).position(150, 105);
+
+    const wire1 = new Wire({
+      source: { id: newGenerator.id },
+      target: { id: bulb1.id },
+    });
+
+    const wire2 = new Wire({
+      source: { id: newGenerator.id },
+      target: { id: bulb2.id },
+    });
+
+    graph.addCells([newGenerator, bulb1, bulb2, wire1, wire2]);
+
+    // // Wait for elements to be fully rendered before adding effects and scaling
+    setTimeout(() => {
+      try {
+        const generatorView = newGenerator.findView(paper);
+        if (generatorView) {
+          StatusEffect.add(generatorView, "root", "status");
+          PlaybackRateEffect.add(generatorView, "root", "playback-rate");
+        }
+
+        paper.scale(4);
+        setPlaybackRate(1);
+
+        const toggleLights = (graph, el) => {
+          graph.getNeighbors(el, { outbound: true }).forEach((bulb) => {
+            bulb.set("light", el.power >= bulb.get("watts"));
+          });
+        };
+
+        graph.on("change:power", (el) => toggleLights(graph, el));
+        toggleLights(graph, newGenerator);
+      } catch (error) {
+        console.error("Error setting up effects:", error);
+      }
+    }, 200);
+
+    // setGraph(newGraph);
+    setGenerator(newGenerator);
+
+    // Cleanup function
+    return () => {
+      scroller.remove();
+      paper.remove();
+      if (paperContainerRef.current && paper.el) {
+        paperContainerRef.current.removeChild(paper.el);
+      }
+    };
+  }, []);
+
+  const handlePowerChange = (event) => {
+    const playbackRate = parseFloat(event.target.value);
+    if (generator) {
+      generator.set("power", playbackRate);
+      setPowerLevel(playbackRate);
     }
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-    setLastDoc(null);
+  const getPowerText = () => {
+    return `${powerLevel} x`;
   };
 
   return (
-    <div>
-      <Box>
-        {error && <Alert severity="error">{error}</Alert>}
-        <Typography variant="subtitle1" color="textSecondary" gutterBottom>
-          Last Updated: {lastUpdated || "Never"}
-        </Typography>
-        {loading ? (
-          <Box display="flex" justifyContent="center" padding={2}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Device ID</TableCell>
-                    <TableCell>Temperature (°C)</TableCell>
-                    <TableCell>RSSI (dBm)</TableCell>
-                    <TableCell>SNR (dB)</TableCell>
-                    <TableCell>Timestamp</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {data.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.deviceId}</TableCell>
-                      <TableCell>
-                        {row.sensorData?.temperature ?? "N/A"}
-                      </TableCell>
-                      <TableCell>{row.networkData?.rssi ?? "N/A"}</TableCell>
-                      <TableCell>{row.networkData?.snr ?? "N/A"}</TableCell>
-                      <TableCell>
-                        {row.timestamp
-                          ? new Date(row.timestamp).toLocaleString()
-                          : "N/A"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 50]}
-              component="div"
-              count={total}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </>
-        )}
-      </Box>
-      <div>
-        <h2>Real-Time IoT Data Viewer</h2>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <DeviceSVG data={latestData} />
+    // <div className="canvas" ref={canvas} />
+    <div className="w-full h-screen bg-gray-50">
+      <div
+        ref={canvas}
+        className="w-full h-full"
+        style={{ minHeight: "400px" }}
+      />
+
+   <div className="absolute top-4 left-4 bg-white p-4 rounded-lg shadow-lg">
+        <label
+          htmlFor="power-input"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
+          Power
+        </label>
+        <input
+          type="range"
+          id="power-input"
+          min="0"
+          max="4"
+          step="0.1"
+          value={powerLevel}
+          onChange={handlePowerChange}
+          className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+        />
+        <output
+          htmlFor="power-input"
+          className="block text-sm text-gray-600 mt-1"
+        >
+          {getPowerText()}
+        </output>
       </div>
     </div>
   );
 };
 
-export default IoTDataTable;
+export default GeneratorCircuit;
+
+// import React, { useEffect, useRef, useState } from "react";
+// import {
+//   dia,
+//   ui,
+//   shapes,
+//   util,
+//   layout,
+//   highlighters,
+//   elementTools,
+//   format,
+// } from "@joint/plus";
+
+// // Turbine metrics
+// const r = 16;
+// const a = 3;
+// const b = 4;
+
+// // Custom view flags
+// const POWER_FLAG = "POWER";
+// const LIGHT_FLAG = "LIGHT";
+
+// class Generator extends dia.Element {
+//   defaults() {
+//     return {
+//       ...super.defaults,
+//       type: "Generator",
+//       size: {
+//         width: 60,
+//         height: 80,
+//       },
+//       power: 0,
+//       attrs: {
+//         root: {
+//           magnetSelector: "body",
+//         },
+//         body: {
+//           width: "calc(w)",
+//           height: "calc(h)",
+//           stroke: "#7f4439",
+//           strokeWidth: 2,
+//           fill: "#945042",
+//           rx: 5,
+//           ry: 5,
+//         },
+//         label: {
+//           text: "Generator",
+//           textAnchor: "middle",
+//           textVerticalAnchor: "top",
+//           x: "calc(0.5*w)",
+//           y: "calc(h+10)",
+//           fontSize: "14",
+//           fontFamily: "sans-serif",
+//           fill: "#350100",
+//         },
+//         generatorGroup: {
+//           transform: "translate(calc(w/2),calc(h/2))",
+//           event: "element:power:click",
+//           cursor: "pointer",
+//         },
+//         generatorBackground: {
+//           r: 24,
+//           fill: "#350100",
+//           stroke: "#a95b4c",
+//           strokeWidth: 2,
+//         },
+//         generator: {
+//           d: `M ${a} ${a} ${b} ${r} -${b} ${r} -${a} ${a} -${r} ${b} -${r} -${b} -${a} -${a} -${b} -${r} ${b} -${r} ${a} -${a} ${r} -${b} ${r} ${b} Z`,
+//           stroke: "#a95b4c",
+//           strokeWidth: 2,
+//           fill: "#c99287",
+//         },
+//       },
+//     };
+//   }
+
+//   get power() {
+//     return Math.round(this.get("power") * 100);
+//   }
+
+//   preinitialize() {
+//     this.markup = util.svg`
+//           <rect @selector="body" />
+//           <g @selector="generatorGroup">
+//             <circle @selector="generatorBackground" />
+//             <path @selector="generator" />
+//           </g>
+//           <text @selector="label" />
+//         `;
+//   }
+// }
+
+// const GeneratorView = dia.ElementView.extend({
+//   presentationAttributes: dia.ElementView.addPresentationAttributes({
+//     power: [POWER_FLAG],
+//   }),
+
+//   initFlag: [dia.ElementView.Flags.RENDER, POWER_FLAG],
+
+//   powerAnimation: null,
+
+//   confirmUpdate(...args) {
+//     let flags = dia.ElementView.prototype.confirmUpdate.call(this, ...args);
+//     if (this.hasFlag(flags, POWER_FLAG)) {
+//       this.togglePower();
+//       flags = this.removeFlag(flags, POWER_FLAG);
+//     }
+//     return flags;
+//   },
+
+//   getSpinAnimation() {
+//     let { spinAnimation } = this;
+//     if (spinAnimation) return spinAnimation;
+//     // const [generatorEl] = this.findBySelector("generator");
+//     const elements = this.findBySelector("generator");
+//     console.log("Found elements for selector 'generator':", elements); // Debug
+//     const [generatorEl] = elements;
+//     if (!generatorEl) {
+//       console.error("No generator element found!");
+//       return null; // Prevent further errors
+//     }
+//     const keyframes = { transform: ["rotate(0deg)", "rotate(360deg)"] };
+//     spinAnimation = generatorEl.animate(keyframes, {
+//       fill: "forwards",
+//       duration: 1000,
+//       iterations: Infinity,
+//     });
+//     this.spinAnimation = spinAnimation;
+//     return spinAnimation;
+//   },
+
+//   togglePower() {
+//     const { model } = this;
+//     const playbackRate = model.get("power");
+//     this.getSpinAnimation().playbackRate = playbackRate;
+//   },
+// });
+
+// class Bulb extends dia.Element {
+//   defaults() {
+//     return {
+//       ...super.defaults,
+//       type: "Bulb",
+//       size: {
+//         width: 28,
+//         height: 30,
+//       },
+//       attrs: {
+//         root: {
+//           magnetSelector: "glass",
+//         },
+//         cap1: {
+//           y: "calc(h + 1)",
+//           x: "calc(w / 2 - 6)",
+//           width: 12,
+//         },
+//         cap2: {
+//           y: "calc(h + 5)",
+//           x: "calc(w / 2 - 5)",
+//           width: 10,
+//         },
+//         cap: {
+//           fill: "#350100",
+//           height: 3,
+//         },
+//         glass: {
+//           fill: "#f1f5f7",
+//           stroke: "#659db3",
+//           refD: "M 14.01 0 C 3.23 0.01 -3.49 11.68 1.91 21.01 C 2.93 22.78 4.33 24.31 6.01 25.48 L 6.01 32 L 22.01 32 L 22.01 25.48 C 30.85 19.31 29.69 5.89 19.93 1.32 C 18.08 0.45 16.06 0 14.01 0 Z",
+//         },
+//         label: {
+//           textAnchor: "middle",
+//           textVerticalAnchor: "middle",
+//           x: "calc(w / 2)",
+//           y: "calc(h / 2)",
+//           fontSize: 7,
+//           fontFamily: "sans-serif",
+//           fill: "#350100",
+//         },
+//       },
+//     };
+//   }
+
+//   preinitialize() {
+//     this.markup = util.svg`
+//           <rect @selector="cap1" @group-selector="cap"/>
+//           <rect @selector="cap2" @group-selector="cap"/>
+//           <path @selector="glass"/>
+//           <text @selector="label" />
+//         `;
+//   }
+
+//   static create(watts = 100) {
+//     return new this({
+//       watts: watts,
+//       attrs: {
+//         label: {
+//           text: `${watts} W`,
+//         },
+//       },
+//     });
+//   }
+// }
+
+// const BulbView = dia.ElementView.extend({
+//   presentationAttributes: dia.ElementView.addPresentationAttributes({
+//     light: [LIGHT_FLAG],
+//   }),
+
+//   initFlag: [dia.ElementView.Flags.RENDER, LIGHT_FLAG],
+
+//   glassAnimation: null,
+
+//   confirmUpdate(...args) {
+//     let flags = dia.ElementView.prototype.confirmUpdate.call(this, ...args);
+//     if (this.hasFlag(flags, LIGHT_FLAG)) {
+//       // Delay the light toggle to ensure elements are rendered
+//       setTimeout(() => this.toggleLight(), 50);
+//       flags = this.removeFlag(flags, LIGHT_FLAG);
+//     }
+//     return flags;
+//   },
+
+//   getGlassAnimation() {
+//     let { glassAnimation } = this;
+//     if (glassAnimation) return glassAnimation;
+//     const [glassEl] = this.findBySelector("glass");
+//     const keyframes = {
+//       stroke: ["#edbc26"],
+//       fill: ["#f5e5b7"],
+//       strokeWidth: [2],
+//     };
+//     glassAnimation = glassEl.animate(keyframes, {
+//       fill: "forwards",
+//       duration: 500,
+//       iterations: 1,
+//     });
+//     this.glassAnimation = glassAnimation;
+//     return glassAnimation;
+//   },
+
+//   toggleLight() {
+//     const { model } = this;
+//     const state = model.get("light") ? 1 : -1;
+//     this.getGlassAnimation().playbackRate = state;
+//   },
+// });
+
+// class Wire extends dia.Link {
+//   defaults() {
+//     return {
+//       ...super.defaults,
+//       type: "Wire",
+//       z: -1,
+//       attrs: {
+//         line: {
+//           connection: true,
+//           stroke: "#346f83",
+//           strokeWidth: 2,
+//           strokeLinejoin: "round",
+//           strokeLinecap: "round",
+//         },
+//         outline: {
+//           connection: true,
+//           stroke: "#004456",
+//           strokeWidth: 4,
+//           strokeLinejoin: "round",
+//           strokeLinecap: "round",
+//         },
+//       },
+//     };
+//   }
+
+//   preinitialize() {
+//     this.markup = util.svg`
+//           <path @selector="outline" fill="none"/>
+//           <path @selector="line" fill="none"/>
+//         `;
+//   }
+// }
+
+// const StatusEffect = dia.HighlighterView.extend({
+//   UPDATE_ATTRIBUTES: ["power"],
+//   tagName: "circle",
+//   attributes: {
+//     r: 5,
+//     stroke: "white",
+//     event: "element:power:click",
+//     cursor: "pointer",
+//   },
+//   highlight: function (cellView) {
+//     const { vel } = this;
+//     const { model } = cellView;
+//     const { width, height } = model.size();
+//     const power = model.get("power");
+//     vel.attr("fill", power === 0 ? "#ed4912" : "#65b374");
+//     vel.attr("cx", width - 10);
+//     vel.attr("cy", height - 10);
+//   },
+// });
+
+// const PlaybackRateEffect = dia.HighlighterView.extend({
+//   UPDATE_ATTRIBUTES: ["power"],
+//   tagName: "text",
+//   attributes: {
+//     r: 5,
+//     fill: "white",
+//     "font-size": 7,
+//     "font-family": "sans-serif",
+//     "text-anchor": "end",
+//   },
+//   highlight: function (cellView) {
+//     const { vel } = this;
+//     const { model } = cellView;
+//     const { width, height } = model.size();
+//     const { power } = model;
+//     let text;
+//     switch (power) {
+//       case 0:
+//         text = "Off";
+//         break;
+//       case 100:
+//         text = "On";
+//         break;
+//       case 400:
+//         text = "Max";
+//         break;
+//       default:
+//         text = `${power} %`;
+//     }
+//     vel.attr("x", width - 18);
+//     vel.attr("y", height - 5);
+//     vel.text(text, { textVerticalAnchor: "bottom" });
+//   },
+// });
+
+// const GeneratorCircuit = () => {
+//   const paperContainerRef = useRef(null);
+//   const [powerLevel, setPowerLevel] = useState(1);
+//   const [graph, setGraph] = useState(null);
+//   const [generator, setGenerator] = useState(null);
+//   const containerRef = useRef(null);
+
+//   // const paperContainerRef = useRef<HTMLDivElement>(null);
+//   const stencilContainerRef = useRef(null);
+//   const toolbarContainerRef = useRef(null);
+//   const playbackRateEl = useRef(null);
+//   const playbackRateOutputEl = useRef(null);
+//   const graphRef = useRef(null);
+//   const paperRef = useRef(null);
+//   const stencilRef = useRef(null);
+//   const placeholderPaperRef = useRef(null);
+//   const placeholderGraphRef = useRef(null);
+//   const toolbarRef = useRef(null);
+
+//   const canvas = useRef(null);
+
+//   useEffect(() => {
+//     if (!paperContainerRef.current) return;
+//     const namespace = {
+//       ...shapes,
+//       Generator,
+//       GeneratorView,
+//       Bulb,
+//       BulbView,
+//       Wire,
+//     };
+//     const graph = new dia.Graph({}, { cellNamespace: namespace });
+
+//     const paper = new dia.Paper({
+//       model: graph,
+//       background: {
+//         color: "#F8F9FA",
+//       },
+//       frozen: true,
+//       async: true,
+//       cellViewNamespace: shapes,
+//     });
+
+//     const scroller = new ui.PaperScroller({
+//       paper,
+//       autoResizePaper: true,
+//       cursor: "grab",
+//     });
+
+//     paperContainerRef.current.appendChild(scroller.el);
+//     scroller.render().center();
+
+//     paperContainerRef.current.appendChild(paper.el);
+
+//     paper.on("element:power:click", ({ model }, evt) => {
+//       evt.stopPropagation();
+//       const playbackRate = model.get("power") ? 0 : 1;
+//       setPlaybackRate(playbackRate);
+//     });
+
+//     const rect = new shapes.standard.Rectangle({
+//       position: { x: 100, y: 100 },
+//       size: { width: 100, height: 50 },
+//       attrs: {
+//         label: {
+//           text: "Hello World",
+//         },
+//       },
+//     });
+
+//     // graph.addCell(rect);
+//     paper.unfreeze();
+
+//     paperContainerRef.current.addEventListener("input", ({ target }) => {
+//       const playbackRate = parseFloat(target.value);
+//       setPlaybackRate(playbackRate);
+//     });
+
+//     function setPlaybackRate(playbackRate) {
+//       generator.set("power", playbackRate);
+//       playbackRateEl.value = playbackRate;
+//       playbackRateOutputEl.textContent = `${playbackRate} x`;
+//     }
+
+//     const generator = new Generator({
+//       position: { x: 50, y: 50 },
+//     });
+
+//     const bulb1 = Bulb.create(100).position(150, 45);
+
+//     const bulb2 = Bulb.create(40).position(150, 105);
+
+//     const wire1 = new Wire({
+//       source: { id: generator.id },
+//       target: { id: bulb1.id },
+//     });
+
+//     const wire2 = new Wire({
+//       source: { id: generator.id },
+//       target: { id: bulb2.id },
+//     });
+
+//     graph.addCells([generator, bulb1, bulb2, wire1, wire2]);
+
+//     StatusEffect.add(generator.findView(paper), "root", "status");
+//     PlaybackRateEffect.add(generator.findView(paper), "root", "playback-rate");
+
+//     paper.scale(4);
+//     setPlaybackRate(4);
+
+//     graph.on("change:power", (el) => toggleLights(graphRef.current, el));
+
+//     function toggleLights(graph, el) {
+//       graph.getNeighbors(el, { outbound: true }).forEach((bulb) => {
+//         bulb.set("light", el.power >= bulb.get("watts"));
+//       });
+//     }
+
+//     toggleLights(graph, generator);
+
+//     if (paperContainerRef.current && paperRef.current) {
+//       paperContainerRef.current.appendChild(paperRef.current.el);
+//     }
+
+//     const setupEventHandlers = () => {
+//       if (
+//         !graphRef.current ||
+//         !paperRef.current ||
+//         !placeholderPaperRef.current ||
+//         !placeholderGraphRef.current ||
+//         !toolbarRef.current
+//       ) {
+//         return;
+//       }
+
+//       paperRef.current.on("element:pointerclick", (elementView) => {
+//         paperRef.current.removeTools();
+//         const element = elementView.model;
+//         if (element.get("uniqueKey") === "valve") {
+//           const currentStatus = element.attr("state/status");
+//           element.attr(
+//             "state/status",
+//             currentStatus === "open" ? "closed" : "open"
+//           );
+//           element.attr("label/text", `Valve (${element.attr("state/status")})`);
+//           element.attr(
+//             "body/fill",
+//             currentStatus === "open" ? "#32CD32" : "#FF4500"
+//           );
+//         }
+//         //   const toolsView = new dia.ToolsView({
+//         //     tools: [
+//         //       new elementTools.Boundary({ useModelGeometry: true }),
+//         //       new elementTools.Connect({
+//         //         useModelGeometry: true,
+//         //         x: "calc(w + 10)",
+//         //         y: "calc(h / 2)",
+//         //       }),
+//         //       new elementTools.Remove({
+//         //         useModelGeometry: true,
+//         //         x: -10,
+//         //         y: -10,
+//         //       }),
+//         //     ],
+//         //   });
+//         //   elementView.addTools(toolsView);
+//       });
+
+//       paperRef.current.on("blank:pointerdown", () => {
+//         paperRef.current.removeTools();
+//       });
+//     };
+
+//     setupEventHandlers();
+
+//     return () => {
+//       paperRef.current?.remove();
+//       scroller.remove();
+//       paper.remove();
+//     };
+//   }, []);
+
+//   return (
+//     <div>
+//       <div
+//         ref={paperContainerRef}
+//         // className="w-full h-full"
+//         style={{ minHeight: "400px", border: "1px solid #000" }}
+//       />
+
+//       {/* <div className="absolute top-4 left-4 bg-white p-4 rounded-lg shadow-lg">
+//         <label
+//           htmlFor="power-input"
+//           className="block text-sm font-medium text-gray-700 mb-2"
+//         >
+//           Power
+//         </label>
+//         <input
+//           type="range"
+//           id="power-input"
+//           min="0"
+//           max="4"
+//           step="0.1"
+//           value={powerLevel}
+//           onChange={handlePowerChange}
+//           className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+//         />
+//         <output
+//           htmlFor="power-input"
+//           className="block text-sm text-gray-600 mt-1"
+//         >
+//           {getPowerText()}
+//         </output>
+//       </div> */}
+//     </div>
+//   );
+// };

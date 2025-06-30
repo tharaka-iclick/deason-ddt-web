@@ -1,0 +1,33 @@
+/* #paper {
+  position: absolute;
+  top: 0;
+  right: 170px;
+  bottom: 0;
+  left: 170px;
+}
+
+#stencil {
+  position: absolute;
+  top: 0;
+  width: 250px;
+  bottom: 0;
+  left: 0;
+}
+
+#toolbar {
+  position: absolute;
+  top: 15px;
+  right: 200px;
+}
+
+#toolbar .joint-toolbar {
+  padding: 5px;
+}
+
+#inspector {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 170px;
+} */

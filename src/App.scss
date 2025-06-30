@@ -50,3 +50,112 @@ body,
 .joint-toolbar button:hover {
   background: #005bb5;
 }
+
+// Stencil styles
+.joint-stencil {
+  background: #f8f9fa;
+  border-right: 1px solid #dee2e6;
+}
+
+.joint-stencil .joint-stencil-group {
+  margin-bottom: 10px;
+}
+
+.joint-stencil .joint-stencil-group-header {
+  background: #e9ecef;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 14px;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.joint-stencil .joint-stencil-group-header:hover {
+  background: #dee2e6;
+}
+
+.joint-stencil .joint-stencil-group-content {
+  padding: 8px;
+}
+
+.joint-stencil .joint-stencil-group-content.collapsed {
+  display: none;
+}
+
+.joint-stencil .joint-stencil-group-toggle {
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.joint-stencil .joint-stencil-group.collapsed .joint-stencil-group-toggle {
+  transform: rotate(-90deg);
+}
+
+.joint-stencil .joint-stencil-element {
+  margin-bottom: 8px;
+  cursor: grab;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.joint-stencil .joint-stencil-element:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.joint-stencil .joint-stencil-element:active {
+  cursor: grabbing;
+}
+
+.joint-stencil .joint-stencil-element .joint-element {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: white;
+}
+
+// Search box styles
+.joint-stencil .joint-stencil-search {
+  padding: 8px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.joint-stencil .joint-stencil-search input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.joint-stencil .joint-stencil-search input:focus {
+  outline: none;
+  border-color: #0075f2;
+  box-shadow: 0 0 0 2px rgba(0, 117, 242, 0.25);
+}
+
+// Paper container styles
+.joint-paper-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.joint-paper {
+  border: 1px solid #ccc;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .joint-stencil {
+    width: 200px !important;
+  }
+
+  .joint-stencil .joint-stencil-group-content {
+    padding: 4px;
+  }
+
+  .joint-stencil .joint-stencil-element {
+    margin-bottom: 4px;
+  }
+}
