@@ -19,6 +19,7 @@ import JointJSCircuitSimulator from "./components/JointJSCircuitSimulator";
 import NewDiagram from "./components/NewDiagram";
 import NewDiagTest from "./components/NewDiagTest";
 import NewStencilDiag from "./components/NewStencilDiag";
+import PumpComponent from "./components/PumpComponent";
 
 const container = document.getElementById("root");
 const root = createRoot(container!);
