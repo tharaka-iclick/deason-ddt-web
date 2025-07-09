@@ -10,9 +10,10 @@ import {
   format,
   connectors,
   anchors,
+  StencilGroupType,
   linkTools,
 } from "@joint/plus";
-import "./styles.css";
+// import "./styles.css";
 import {
   Shape,
   PortTargetArrowhead,
@@ -28,6 +29,103 @@ import { LiquidTank, PanelView } from "../DDTWidget/LiquidTank";
 import { Panel } from "../DDTWidget/Panel";
 import { Pipe, PipeView } from "../DDTWidget/Pipe";
 import { Zone } from "../DDTWidget/Zone";
+import {
+  Menu,
+  X,
+  TrendingUp,
+  Code,
+  Eye,
+  Settings,
+  Save,
+  Download,
+  Upload,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  Target,
+  Bug,
+  Info,
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Square,
+  Circle,
+  Triangle,
+  Hexagon,
+  Type,
+  Star,
+} from "lucide-react";
+import {
+  Box,
+  Paper,
+  Drawer,
+  AppBar,
+  Toolbar,
+  Typography,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Chip,
+  useTheme,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Container,
+  Grid,
+  Fab,
+  Badge,
+  Avatar,
+} from "@mui/material";
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Timeline as TimelineIcon,
+  Code as CodeIcon,
+  Visibility as VisibilityIcon,
+  Build as BuildIcon,
+  Save as SaveIcon,
+  Download as DownloadIcon,
+  Upload as UploadIcon,
+  Refresh as RefreshIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  CenterFocusStrong as CenterIcon,
+  BugReport as BugReportIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  CheckCircle as CheckCircleIcon,
+} from "@mui/icons-material";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#1976d2",
+      light: "#42a5f5",
+      dark: "#1565c0",
+    },
+    secondary: {
+      main: "#dc004e",
+    },
+    background: {
+      default: "#f5f5f5",
+      paper: "#ffffff",
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+  },
+  shape: {
+    borderRadius: 8,
+  },
+});
 
 const POWER_FLAG = "POWER";
 const LIGHT_FLAG = "LIGHT";
@@ -422,538 +520,454 @@ class HeatPump extends dia.Element {
     return {
       ...super.defaults,
       type: "HeatPump",
-      size: { width: 680, height: 396 },
+      size: {
+        width: 340,
+        height: 198,
+      },
       power: 0,
+      temperature: 22,
+      mode: "heat", // heat, cool, auto
       attrs: {
-        root: { magnetSelector: "bodyFrame" },
-        background: { width: "calc(w)", height: "calc(h)", fill: "#F5F5F5" },
-        bodyFrame: {
-          x: 2,
-          y: 2,
-          width: 617,
-          height: 366,
-          rx: 8,
-          fill: {
-            type: "linearGradient",
-            stops: [
-              { offset: "0%", color: "#808080" },
-              { offset: "28.8462%", color: "#E2E2E2" },
-              { offset: "51.9231%", color: "white" },
-              { offset: "72.5962%", color: "#E2E2E2" },
-              { offset: "100%", color: "#808080" },
-            ],
-            attrs: { x1: 621, y1: 185, x2: 0, y2: 185 },
-          },
+        root: {
+          magnetSelector: "body",
+        },
+
+        // Main body background
+        body: {
+          width: "calc(0.91 * w)",
+          height: "calc(0.92 * h)",
+          x: "calc(0.003 * w)",
+          y: "calc(0.005 * h)",
+          rx: 4,
+          fill: "url(#bodyGradient)",
           stroke: "#808080",
-          strokeWidth: 4,
+          strokeWidth: 2,
         },
-        feet1: {
-          x: 82,
-          y: 370,
-          width: 58,
-          height: 11,
-          fill: {
-            type: "linearGradient",
-            stops: [
-              { offset: "0%", color: "#737373" },
-              { offset: "51.4423%", color: "#D9D9D9" },
-              { offset: "100%", color: "#737373" },
-            ],
-            attrs: { x1: 82, y1: 375.5, x2: 140, y2: 375.5 },
-          },
-        },
-        feet2: { x: 47, y: 381, width: 128, height: 15, fill: "#808080" },
-        feet3: {
-          x: 476,
-          y: 370,
-          width: 58,
-          height: 11,
-          fill: {
-            type: "linearGradient",
-            stops: [
-              { offset: "0%", color: "#737373" },
-              { offset: "51.4423%", color: "#D9D9D9" },
-              { offset: "100%", color: "#737373" },
-            ],
-            attrs: { x1: 476, y1: 375.5, x2: 534, y2: 375.5 },
-          },
-        },
-        feet4: { x: 441, y: 381, width: 128, height: 15, fill: "#808080" },
-        connector1: {
-          x: 621,
-          y: 46.9279,
-          width: 37.7213,
-          height: 61.982,
-          fill: {
-            type: "linearGradient",
-            stops: [
-              { offset: "0.480769%", color: "#737373" },
-              { offset: "51.4423%", color: "#D9D9D9" },
-              { offset: "100%", color: "#737373" },
-            ],
-            attrs: { x1: 639.861, y1: 46.9279, x2: 639.861, y2: 108.91 },
-          },
-        },
-        connector2: {
-          x: 658.721,
-          y: 39,
-          width: 6.77049,
-          height: 77.1171,
-          fill: "#808080",
-        },
-        connector3: {
-          x: 665.492,
-          y: 39,
-          width: 14.5082,
-          height: 77.1171,
-          fill: "#C2C2C2",
-        },
-        connector4: {
-          x: 621,
-          y: 129.811,
-          width: 37.7213,
-          height: 61.982,
-          fill: {
-            type: "linearGradient",
-            stops: [
-              { offset: "0.480769%", color: "#737373" },
-              { offset: "51.4423%", color: "#D9D9D9" },
-              { offset: "100%", color: "#737373" },
-            ],
-            attrs: { x1: 639.861, y1: 129.811, x2: 639.861, y2: 191.793 },
-          },
-        },
-        connector5: {
-          x: 658.721,
-          y: 121.883,
-          width: 6.77049,
-          height: 77.1171,
-          fill: "#808080",
-        },
-        connector6: {
-          x: 665.492,
-          y: 121.883,
-          width: 14.5082,
-          height: 77.1171,
-          fill: "#C2C2C2",
-        },
-        ventBG: {
-          x: 42.7462,
-          y: 260,
-          width: 71.5398,
-          height: 68,
-          fill: "white",
-        },
-        airVent: {
-          d: "M116.517 254H40.483C38.0106 254 36 255.892 36 258.219V329.781C36 332.108 38.0106 334 40.483 334H116.517C118.989 334 121 332.108 121 329.781V258.219C121 255.892 118.989 254 116.517 254ZM118.675 329.781C118.675 330.9 117.706 331.811 116.517 331.811H40.483C39.2938 331.811 38.3253 330.9 38.3253 329.781V258.219C38.3253 257.1 39.2938 256.188 40.483 256.188H116.517C117.706 256.188 118.675 257.1 118.675 258.219V329.781ZM114.523 259H42.4735C41.8319 259 41.3129 259.488 41.3129 260.092V327.903C41.3129 328.507 41.8319 328.996 42.4735 328.996H114.523C115.164 328.996 115.683 328.507 115.683 327.903L115.687 260.092C115.687 259.488 115.168 259 114.527 259H114.523ZM43.6378 280.807L50.3152 278.953V286.845L43.6378 288.699V280.807ZM52.6405 289.126L59.3219 290.98V298.872L52.6405 297.018V289.126ZM61.6472 290.98L68.3286 289.126V297.018L61.6472 298.872V290.98ZM70.6539 289.126L77.3353 290.98V298.872L70.6539 297.018V289.126ZM79.6606 290.98L86.342 289.126V297.018L79.6606 298.872V290.98ZM88.6673 289.126L95.3487 290.98V298.872L88.6673 297.018V289.126ZM97.674 290.98L104.355 289.126V297.018L97.674 298.872V290.98ZM104.355 286.845L97.674 288.699V280.807L104.355 278.953V286.845ZM95.3487 288.699L88.6673 286.845V278.953L95.3487 280.807V288.699ZM86.342 286.842L79.6606 288.695V280.803L86.342 278.949V286.842ZM77.3353 288.699L70.6539 286.845V278.953L77.3353 280.807V288.699ZM68.3286 286.842L61.6472 288.695V280.803L68.3286 278.949V286.842ZM59.3219 288.695L52.6405 286.842V278.949L59.3219 280.803V288.695ZM52.6405 299.296L59.3219 301.15V309.042L52.6405 307.188V299.296ZM61.6472 301.15L68.3286 299.296V307.188L61.6472 309.042V301.15ZM70.6539 299.296L77.3353 301.15V309.042L70.6539 307.188V299.296ZM79.6606 301.15L86.342 299.296V307.188L79.6606 309.042V301.15ZM88.6673 299.296L95.3487 301.15V309.042L88.6673 307.188V299.296ZM97.674 301.15L104.355 299.296V307.188L97.674 309.042V301.15ZM106.681 289.119L113.37 290.972V298.865L106.681 297.011V289.119ZM113.37 288.692L106.681 286.838V278.946L113.37 280.799V288.692ZM104.36 276.661L97.6781 278.515V270.618L104.36 268.765V276.661ZM95.3528 278.515L88.6714 276.661V268.765L95.3528 270.618V278.515ZM86.3461 276.657L79.6647 278.511V270.615L86.3461 268.761V276.657ZM77.3394 278.515L70.658 276.661V268.765L77.3394 270.618V278.515ZM68.3327 276.657L61.6513 278.511V270.615L68.3327 268.761V276.657ZM59.326 278.511L52.6445 276.657V268.761L59.326 270.615V278.511ZM43.6421 290.964L50.3195 289.11V297.002L43.6421 298.856V290.964ZM43.6421 301.137L50.3195 299.283V307.175L43.6421 309.029V301.137ZM52.6447 309.456L59.3262 311.31V319.206L52.6447 317.352V309.456ZM61.6515 311.31L68.3329 309.456V317.352L61.6515 319.206V311.31ZM70.6582 309.456L77.3396 311.31V319.206L70.6582 317.352V309.456ZM79.6649 311.31L86.3463 309.456V317.352L79.6649 319.206V311.31ZM88.6716 309.456L95.353 311.31V319.206L88.6716 317.352V309.456ZM97.6783 311.31L104.36 309.456V317.352L97.6783 319.206V311.31ZM106.685 299.279L113.375 301.133V309.025L106.685 307.171V299.279ZM113.375 278.506L106.685 276.652V268.756L113.375 270.61V278.506ZM104.364 266.475L97.6824 268.329V261.163H104.364V266.475ZM95.3571 268.329L88.6757 266.475V261.163H95.3571V268.329ZM86.3504 266.471L79.669 268.325V261.163H86.3504V266.471ZM77.3437 268.329L70.6623 266.475V261.163H77.3437V268.329ZM68.337 266.471L61.6555 268.325V261.16H68.337V266.471ZM59.3303 268.325L52.6488 266.471V261.163H59.3303V268.329V268.325ZM50.3236 276.644L43.6462 278.498V270.602L50.3236 268.748V276.644ZM43.6462 311.301L50.3236 309.447V317.344L43.6462 319.197V311.301ZM52.6488 319.624L59.3303 321.478V326.786H52.6488V319.624ZM61.6555 321.478L68.337 319.624V326.786H61.6555V321.478ZM70.6623 319.624L77.3437 321.478V326.782H70.6623V319.62V319.624ZM79.669 321.478L86.3504 319.624V326.786H79.669V321.478ZM88.6757 319.624L95.3571 321.478V326.782H88.6757V319.62V319.624ZM97.6824 321.478L104.364 319.624V326.786H97.6824V321.478ZM106.689 309.447L113.379 311.301V319.197L106.689 317.343V309.447ZM113.379 268.324L106.689 266.47V261.162H113.379V268.328V268.324ZM50.3158 261.186V266.493L43.6385 268.347V261.186H50.3158ZM43.6385 321.505L50.3158 319.651V326.812H43.6385V321.505ZM106.677 326.812V319.651L113.367 321.505V326.809H106.677V326.812Z",
-          fill: "#808080",
-        },
-        fanCircle: {
-          x: 282.5,
-          y: 47.5,
-          width: 282,
-          height: 282,
-          rx: 141,
-          fill: {
-            type: "radialGradient",
-            stops: [
-              { offset: "81.7308%", color: "white" },
-              { offset: "100%", color: "#999999" },
-            ],
-            attrs: {
-              cx: 0,
-              cy: 0,
-              r: 1,
-              gradientTransform:
-                "translate(423.5 188.5) rotate(90) scale(148.5)",
-            },
-          },
+
+        // Fan housing
+        fanHousing: {
+          r: "calc(0.207 * w)",
+          cx: "calc(0.623 * w)",
+          cy: "calc(0.475 * h)",
+          fill: "url(#fanHousingGradient)",
           stroke: "#808080",
-          strokeWidth: 15,
+          strokeWidth: 7,
         },
+
+        // Fan blades group
+        fanGroup: {
+          transform: "translate(calc(0.623 * w), calc(0.475 * h))",
+          event: "element:fan:click",
+          cursor: "pointer",
+        },
+
+        // Fan blades path
         fanBlades: {
-          d: "M439.762 290.389C439.988 294.345 442.004 297.869 445.296 300.053C447.354 301.434 449.72 302.114 452.106 302.114C453.526 302.114 454.946 301.867 456.324 301.372L485.19 290.965C488.42 289.79 490.972 287.421 492.35 284.268C493.729 281.115 493.749 277.632 492.412 274.458L461.406 200.991L513.542 238.147C515.682 239.671 518.171 240.455 520.702 240.455C521.978 240.455 523.274 240.249 524.529 239.836C528.294 238.62 531.174 235.777 532.45 232.026L542.326 202.948C543.437 199.692 543.169 196.21 541.564 193.18C539.96 190.13 537.264 187.946 533.952 187.018L457.269 165.463L518.809 147.843C522.615 146.751 525.599 144.01 526.998 140.301C528.397 136.591 527.985 132.552 525.846 129.234L509.325 103.351C507.473 100.445 504.592 98.5083 501.218 97.8487C497.823 97.1893 494.449 97.9518 491.651 99.9507L426.782 146.669L451.286 87.255C452.788 83.5869 452.5 79.5479 450.463 76.1473C448.426 72.747 445.01 70.5832 441.081 70.1711L410.569 67.0594C407.092 66.7297 403.8 67.7807 401.187 70.0269C398.595 72.2731 397.072 75.4054 396.908 78.8471L393.184 158.519L362.199 102.445C360.285 98.9827 356.952 96.6955 353.022 96.1595C349.093 95.6443 345.266 96.9426 342.509 99.7865L321.05 121.734C318.643 124.186 317.388 127.442 317.532 130.884C317.655 134.325 319.157 137.458 321.729 139.745L381.557 192.357L318.474 181.62C314.565 180.981 310.696 182.135 307.837 184.876C304.977 187.617 303.619 191.43 304.092 195.366L307.837 225.865C308.248 229.286 310.018 232.295 312.775 234.335C314.935 235.922 317.466 236.767 320.099 236.767C320.84 236.767 321.581 236.705 322.321 236.561L400.732 222.548L352.999 265.226C350.057 267.864 348.555 271.635 348.905 275.571C349.255 279.507 351.395 282.969 354.748 285.051L380.878 301.145C382.853 302.361 385.075 303 387.338 303C388.408 303 389.499 302.856 390.568 302.567C393.881 301.681 396.617 299.517 398.263 296.488L436.243 226.381L439.762 290.389ZM390.798 187.536C390.798 170.04 404.994 155.821 422.462 155.821C439.93 155.821 454.126 170.04 454.126 187.536C454.126 205.032 439.93 219.251 422.462 219.251C405.015 219.251 390.798 205.012 390.798 187.536Z",
-          fill: {
-            type: "radialGradient",
-            stops: [
-              { offset: "0%", color: "#9DFF98" },
-              { offset: "100%", color: "#078C00" },
-            ],
-            attrs: {
-              cx: 0,
-              cy: 0,
-              r: 1,
-              gradientTransform:
-                "translate(423.5 185) rotate(90) scale(118 119.5)",
-            },
+          d: "M 0,-60 L 15,-45 L 0,-30 L -15,-45 Z M 0,60 L -15,45 L 0,30 L 15,45 Z M 60,0 L 45,15 L 30,0 L 45,-15 Z M -60,0 L -45,-15 L -30,0 L -45,15 Z M 42,-42 L 30,-30 L 42,-18 L 54,-30 Z M -42,42 L -54,30 L -42,18 L -30,30 Z M 42,42 L 54,30 L 42,18 L 30,30 Z M -42,-42 L -30,-30 L -42,-18 L -54,-30 Z",
+          fill: "url(#fanBladeGradient)",
+          stroke: "#222",
+          strokeWidth: 1.5,
+          style: {
+            transition: "transform 0.3s ease-in-out",
           },
-          stroke: {
-            type: "radialGradient",
-            stops: [
-              { offset: "0%", color: "#9DFF98" },
-              { offset: "100%", color: "#078C00" },
-            ],
-            attrs: {
-              cx: 0,
-              cy: 0,
-              r: 1,
-              gradientTransform:
-                "translate(423.5 185) rotate(90) scale(118 119.5)",
-            },
-          },
-          strokeWidth: 4,
-          filter: "url(#filter0_d_0_1)",
         },
-        fanEllipse1: {
-          cx: 423.5,
-          cy: 188.25,
-          r: 104.5,
+
+        // Fan center
+        fanCenter: {
+          r: 16,
+          fill: "#bbb",
+          stroke: "#222",
+          strokeWidth: 1.5,
+        },
+
+        // Fan mesh rings
+        fanMesh1: {
+          r: 52,
+          fill: "none",
           stroke: "#808080",
-          strokeWidth: 3,
-          shapeRendering: "crispEdges",
-          filter: "url(#filter1_d_0_1)",
+          strokeWidth: 1.5,
         },
-        fanEllipse2: {
-          cx: 423.5,
-          cy: 188.25,
-          r: 120.5,
+        fanMesh2: {
+          r: 38,
+          fill: "none",
           stroke: "#808080",
-          strokeWidth: 3,
-          shapeRendering: "crispEdges",
-          filter: "url(#filter2_d_0_1)",
+          strokeWidth: 1.5,
         },
-        fanEllipse3: {
-          cx: 423.5,
-          cy: 188.25,
-          r: 77.5,
+        fanMesh3: {
+          r: 25,
+          fill: "none",
           stroke: "#808080",
-          strokeWidth: 3,
+          strokeWidth: 1.5,
         },
-        fanEllipse4: {
-          cx: 423.5,
-          cy: 188.25,
-          r: 50.5,
-          stroke: "#808080",
-          strokeWidth: 3,
-        },
-        fanEllipse5: {
-          cx: 423.5,
-          cy: 188.25,
-          r: 32.5,
-          fill: "white",
-          stroke: "#808080",
-          strokeWidth: 3,
-        },
-        bolt1: { cx: 424, cy: 48, r: 4, fill: "white" },
-        bolt2: { cx: 565, cy: 188, r: 4, fill: "white" },
-        bolt3: { cx: 424, cy: 330, r: 4, fill: "white" },
-        bolt4: { cx: 282, cy: 188, r: 4, fill: "white" },
-        bolt5: { cx: 318, cy: 95, r: 4, fill: "white" },
-        bolt6: { cx: 529, cy: 95, r: 4, fill: "white" },
-        bolt7: { cx: 529, cy: 281, r: 4, fill: "white" },
-        bolt8: { cx: 318, cy: 281, r: 4, fill: "white" },
+
+        // Display panel
         display: {
-          x: 36,
-          y: 40,
-          width: 191,
-          height: 102,
-          rx: 8,
+          width: "calc(0.281 * w)",
+          height: "calc(0.515 * h)",
+          x: "calc(0.106 * w)",
+          y: "calc(0.202 * h)",
+          rx: 4,
           fill: "white",
-          filter: "url(#filter3_d_0_1)",
-        },
-        displayFrame: {
-          x: 37.5,
-          y: 41.5,
-          width: 188,
-          height: 99,
-          rx: 6.5,
           stroke: "#737373",
-          strokeWidth: 3,
+          strokeWidth: 1.5,
         },
+
+        // Display text
+        displayTemp: {
+          text: "22°C",
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          x: "calc(0.246 * w)",
+          y: "calc(0.35 * h)",
+          fontSize: 16,
+          fontFamily: "Arial, sans-serif",
+          fontWeight: "bold",
+          fill: "#000",
+        },
+
+        displayMode: {
+          text: "HEAT",
+          textAnchor: "middle",
+          textVerticalAnchor: "middle",
+          x: "calc(0.246 * w)",
+          y: "calc(0.55 * h)",
+          fontSize: 10,
+          fontFamily: "Arial, sans-serif",
+          fill: "#666",
+        },
+
+        // Air vent
+        airVent: {
+          width: "calc(0.21 * w)",
+          height: "calc(0.343 * h)",
+          x: "calc(0.125 * w)",
+          y: "calc(0.641 * h)",
+          rx: 2,
+          fill: "white",
+          stroke: "#808080",
+          strokeWidth: 1,
+        },
+
+        // Vent lines
+        ventLines: {
+          d: "M calc(0.135 * w) calc(0.66 * h) L calc(0.325 * w) calc(0.66 * h) M calc(0.135 * w) calc(0.68 * h) L calc(0.325 * w) calc(0.68 * h) M calc(0.135 * w) calc(0.70 * h) L calc(0.325 * w) calc(0.70 * h) M calc(0.135 * w) calc(0.72 * h) L calc(0.325 * w) calc(0.72 * h) M calc(0.135 * w) calc(0.74 * h) L calc(0.325 * w) calc(0.74 * h) M calc(0.135 * w) calc(0.76 * h) L calc(0.325 * w) calc(0.76 * h) M calc(0.135 * w) calc(0.78 * h) L calc(0.325 * w) calc(0.78 * h) M calc(0.135 * w) calc(0.80 * h) L calc(0.325 * w) calc(0.80 * h) M calc(0.135 * w) calc(0.82 * h) L calc(0.325 * w) calc(0.82 * h) M calc(0.135 * w) calc(0.84 * h) L calc(0.325 * w) calc(0.84 * h) M calc(0.135 * w) calc(0.86 * h) L calc(0.325 * w) calc(0.86 * h) M calc(0.135 * w) calc(0.88 * h) L calc(0.325 * w) calc(0.88 * h) M calc(0.135 * w) calc(0.90 * h) L calc(0.325 * w) calc(0.90 * h) M calc(0.135 * w) calc(0.92 * h) L calc(0.325 * w) calc(0.92 * h) M calc(0.135 * w) calc(0.94 * h) L calc(0.325 * w) calc(0.94 * h) M calc(0.135 * w) calc(0.96 * h) L calc(0.325 * w) calc(0.96 * h)",
+          stroke: "#808080",
+          strokeWidth: 1,
+        },
+
+        // Connectors
+        connector1: {
+          width: "calc(0.111 * w)",
+          height: "calc(0.313 * h)",
+          x: "calc(0.914 * w)",
+          y: "calc(0.237 * h)",
+          fill: "url(#connectorGradient)",
+          stroke: "#808080",
+          strokeWidth: 1,
+        },
+
+        connector2: {
+          width: "calc(0.111 * w)",
+          height: "calc(0.313 * h)",
+          x: "calc(0.914 * w)",
+          y: "calc(0.652 * h)",
+          fill: "url(#connectorGradient)",
+          stroke: "#808080",
+          strokeWidth: 1,
+        },
+
+        // Feet
+        foot1: {
+          width: "calc(0.17 * w)",
+          height: "calc(0.056 * h)",
+          x: "calc(0.241 * w)",
+          y: "calc(0.934 * h)",
+          fill: "url(#footGradient)",
+        },
+
+        foot2: {
+          width: "calc(0.17 * w)",
+          height: "calc(0.056 * h)",
+          x: "calc(0.7 * w)",
+          y: "calc(0.934 * h)",
+          fill: "url(#footGradient)",
+        },
+
+        footBase1: {
+          width: "calc(0.376 * w)",
+          height: "calc(0.076 * h)",
+          x: "calc(0.138 * w)",
+          y: "calc(0.963 * h)",
+          fill: "#808080",
+        },
+
+        footBase2: {
+          width: "calc(0.376 * w)",
+          height: "calc(0.076 * h)",
+          x: "calc(0.649 * w)",
+          y: "calc(0.963 * h)",
+          fill: "#808080",
+        },
+
+        // Label
         label: {
           text: "Heat Pump",
           textAnchor: "middle",
           textVerticalAnchor: "top",
-          x: "calc(0.5*w)",
-          y: "calc(h+10)",
-          fontSize: "14",
+          x: "calc(0.5 * w)",
+          y: "calc(h + 10)",
+          fontSize: 14,
           fontFamily: "sans-serif",
           fill: "#350100",
-        },
-        fanGroup: {
-          transform: "translate(calc(w/2),calc(h/2))",
-          event: "element:fan:click",
-          cursor: "pointer",
-        },
-      },
-      filters: {
-        filter0_d_0_1: {
-          x: 296,
-          y: 63,
-          width: 255,
-          height: 252,
-          filterUnits: "userSpaceOnUse",
-          colorInterpolationFilters: "sRGB",
-          definition: [
-            {
-              type: "flood",
-              attrs: { floodOpacity: 0, result: "BackgroundImageFix" },
-            },
-            {
-              type: "colorMatrix",
-              attrs: {
-                in: "SourceAlpha",
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0",
-                result: "hardAlpha",
-              },
-            },
-            { type: "offset", attrs: { dy: 4 } },
-            { type: "gaussianBlur", attrs: { stdDeviation: 2 } },
-            { type: "composite", attrs: { in2: "hardAlpha", operator: "out" } },
-            {
-              type: "colorMatrix",
-              attrs: {
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in2: "BackgroundImageFix",
-                result: "effect1_dropShadow_0_1",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in: "SourceGraphic",
-                in2: "effect1_dropShadow_0_1",
-                result: "shape",
-              },
-            },
-          ],
-        },
-        filter1_d_0_1: {
-          x: 313.5,
-          y: 82.25,
-          width: 220,
-          height: 220,
-          filterUnits: "userSpaceOnUse",
-          colorInterpolationFilters: "sRGB",
-          definition: [
-            {
-              type: "flood",
-              attrs: { floodOpacity: 0, result: "BackgroundImageFix" },
-            },
-            {
-              type: "colorMatrix",
-              attrs: {
-                in: "SourceAlpha",
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0",
-                result: "hardAlpha",
-              },
-            },
-            { type: "offset", attrs: { dy: 4 } },
-            { type: "gaussianBlur", attrs: { stdDeviation: 2 } },
-            { type: "composite", attrs: { in2: "hardAlpha", operator: "out" } },
-            {
-              type: "colorMatrix",
-              attrs: {
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in2: "BackgroundImageFix",
-                result: "effect1_dropShadow_0_1",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in: "SourceGraphic",
-                in2: "effect1_dropShadow_0_1",
-                result: "shape",
-              },
-            },
-          ],
-        },
-        filter2_d_0_1: {
-          x: 291.5,
-          y: 60.25,
-          width: 264,
-          height: 264,
-          filterUnits: "userSpaceOnUse",
-          colorInterpolationFilters: "sRGB",
-          definition: [
-            {
-              type: "flood",
-              attrs: { floodOpacity: 0, result: "BackgroundImageFix" },
-            },
-            {
-              type: "colorMatrix",
-              attrs: {
-                in: "SourceAlpha",
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0",
-                result: "hardAlpha",
-              },
-            },
-            { type: "offset", attrs: { dy: 4 } },
-            { type: "gaussianBlur", attrs: { stdDeviation: 5 } },
-            { type: "composite", attrs: { in2: "hardAlpha", operator: "out" } },
-            {
-              type: "colorMatrix",
-              attrs: {
-                type: "matrix",
-                values: "0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.25 0",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in2: "BackgroundImageFix",
-                result: "effect1_dropShadow_0_1",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in: "SourceGraphic",
-                in2: "effect1_dropShadow_0_1",
-                result: "shape",
-              },
-            },
-          ],
-        },
-        filter3_d_0_1: {
-          x: 11,
-          y: 19,
-          width: 241,
-          height: 152,
-          filterUnits: "userSpaceOnUse",
-          colorInterpolationFilters: "sRGB",
-          definition: [
-            {
-              type: "flood",
-              attrs: { floodOpacity: 0, result: "BackgroundImageFix" },
-            },
-            {
-              type: "colorMatrix",
-              attrs: {
-                in: "SourceAlpha",
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0",
-                result: "hardAlpha",
-              },
-            },
-            { type: "offset", attrs: { dy: 4 } },
-            { type: "gaussianBlur", attrs: { stdDeviation: 12.5 } },
-            { type: "composite", attrs: { in2: "hardAlpha", operator: "out" } },
-            {
-              type: "colorMatrix",
-              attrs: {
-                type: "matrix",
-                values: "0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in2: "BackgroundImageFix",
-                result: "effect1_dropShadow_0_1",
-              },
-            },
-            {
-              type: "blend",
-              attrs: {
-                mode: "normal",
-                in: "SourceGraphic",
-                in2: "effect1_dropShadow_0_1",
-                result: "shape",
-              },
-            },
-          ],
         },
       },
     };
   }
 
-  get power() {
-    return Math.round(this.get("power") * 100);
+  markup = [
+    {
+      tagName: "defs",
+      children: [
+        {
+          tagName: "linearGradient",
+          attributes: {
+            id: "bodyGradient",
+            x1: "0%",
+            y1: "0%",
+            x2: "100%",
+            y2: "0%",
+          },
+          children: [
+            {
+              tagName: "stop",
+              attributes: { offset: "0%", "stop-color": "#808080" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "28%", "stop-color": "#E2E2E2" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "52%", "stop-color": "white" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "73%", "stop-color": "#E2E2E2" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "100%", "stop-color": "#808080" },
+            },
+          ],
+        },
+        {
+          tagName: "radialGradient",
+          attributes: {
+            id: "fanHousingGradient",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+          },
+          children: [
+            {
+              tagName: "stop",
+              attributes: { offset: "82%", "stop-color": "white" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "100%", "stop-color": "#999999" },
+            },
+          ],
+        },
+        {
+          tagName: "radialGradient",
+          attributes: {
+            id: "fanBladeGradient",
+            cx: "50%",
+            cy: "50%",
+            r: "50%",
+          },
+          children: [
+            {
+              tagName: "stop",
+              attributes: { offset: "0%", "stop-color": "#9DFF98" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "100%", "stop-color": "#078C00" },
+            },
+          ],
+        },
+        {
+          tagName: "linearGradient",
+          attributes: {
+            id: "connectorGradient",
+            x1: "0%",
+            y1: "0%",
+            x2: "0%",
+            y2: "100%",
+          },
+          children: [
+            {
+              tagName: "stop",
+              attributes: { offset: "0%", "stop-color": "#737373" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "51%", "stop-color": "#D9D9D9" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "100%", "stop-color": "#737373" },
+            },
+          ],
+        },
+        {
+          tagName: "linearGradient",
+          attributes: {
+            id: "footGradient",
+            x1: "0%",
+            y1: "0%",
+            x2: "100%",
+            y2: "0%",
+          },
+          children: [
+            {
+              tagName: "stop",
+              attributes: { offset: "0%", "stop-color": "#737373" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "51%", "stop-color": "#D9D9D9" },
+            },
+            {
+              tagName: "stop",
+              attributes: { offset: "100%", "stop-color": "#737373" },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      tagName: "rect",
+      selector: "body",
+    },
+    {
+      tagName: "circle",
+      selector: "fanHousing",
+    },
+    {
+      tagName: "g",
+      selector: "fanGroup",
+      children: [
+        {
+          tagName: "path",
+          selector: "fanBlades",
+        },
+        {
+          tagName: "circle",
+          selector: "fanCenter",
+        },
+        {
+          tagName: "circle",
+          selector: "fanMesh1",
+        },
+        {
+          tagName: "circle",
+          selector: "fanMesh2",
+        },
+        {
+          tagName: "circle",
+          selector: "fanMesh3",
+        },
+      ],
+    },
+    {
+      tagName: "rect",
+      selector: "display",
+    },
+    {
+      tagName: "text",
+      selector: "displayTemp",
+    },
+    {
+      tagName: "text",
+      selector: "displayMode",
+    },
+    {
+      tagName: "rect",
+      selector: "airVent",
+    },
+    {
+      tagName: "path",
+      selector: "ventLines",
+    },
+    {
+      tagName: "rect",
+      selector: "connector1",
+    },
+    {
+      tagName: "rect",
+      selector: "connector2",
+    },
+    {
+      tagName: "rect",
+      selector: "foot1",
+    },
+    {
+      tagName: "rect",
+      selector: "foot2",
+    },
+    {
+      tagName: "rect",
+      selector: "footBase1",
+    },
+    {
+      tagName: "rect",
+      selector: "footBase2",
+    },
+    {
+      tagName: "text",
+      selector: "label",
+    },
+  ];
+
+  // Custom methods
+  setPower(power) {
+    this.set("power", power);
+    this.attr(
+      "fanBlades/style/transform",
+      power > 0 ? "rotate(360deg)" : "rotate(0deg)"
+    );
+    return this;
   }
 
-  preinitialize() {
-    this.markup = util.svg/* xml */ `
-      <rect @selector="background" />
-      <g @selector="heatPump">
-        <g @selector="body">
-          <g @selector="feet">
-            <rect @selector="feet1" />
-            <rect @selector="feet2" />
-          </g>
-          <g @selector="feetGroup2">
-            <rect @selector="feet3" />
-            <rect @selector="feet4" />
-          </g>
-          <g @selector="connectorOne">
-            <rect @selector="connector1" />
-            <rect @selector="connector2" />
-            <rect @selector="connector3" />
-          </g>
-          <g @selector="connectorTwo">
-            <rect @selector="connector4" />
-            <rect @selector="connector5" />
-            <rect @selector="connector6" />
-          </g>
-          <rect @selector="bodyFrame" />
-          <g @selector="airVentGroup">
-            <rect @selector="ventBG" />
-            <path @selector="airVent" />
-          </g>
-          <g @selector="fanGroup">
-            <rect @selector="fanCircle" />
-            <g @selector="fanBladesGroup">
-              <path @selector="fanBlades" />
-            </g>
-            <g @selector="fanFrame">
-              <circle @selector="fanEllipse1" />
-              <circle @selector="fanEllipse2" />
-              <circle @selector="fanEllipse3" />
-              <circle @selector="fanEllipse4" />
-              <circle @selector="fanEllipse5" />
-            </g>
-            <g @selector="frameBolts">
-              <circle @selector="bolt1" />
-              <circle @selector="bolt2" />
-              <circle @selector="bolt3" />
-              <circle @selector="bolt4" />
-              <circle @selector="bolt5" />
-              <circle @selector="bolt6" />
-              <circle @selector="bolt7" />
-              <circle @selector="bolt8" />
-            </g>
-          </g>
-          <g @selector="displayGroup">
-            <rect @selector="display" />
-            <rect @selector="displayFrame" />
-          </g>
-        </g>
-        <text @selector="label" />
-      </g>
-    `;
+  setTemperature(temp) {
+    this.set("temperature", temp);
+    this.attr("displayTemp/text", `${temp}°C`);
+    return this;
+  }
+
+  setMode(mode) {
+    this.set("mode", mode);
+    this.attr("displayMode/text", mode.toUpperCase());
+
+    // Change fan blade color based on mode
+    if (mode === "heat") {
+      this.attr("fanBlades/fill", "url(#fanBladeGradient)");
+    } else if (mode === "cool") {
+      this.attr("fanBlades/fill", "#4A90E2");
+    } else {
+      this.attr("fanBlades/fill", "#FFA500");
+    }
+
+    return this;
+  }
+
+  // Event handlers
+  onFanClick() {
+    const currentPower = this.get("power");
+    this.setPower(currentPower > 0 ? 0 : 1);
   }
 }
 
@@ -1242,8 +1256,7 @@ const NewDiagTest = () => {
       paper: paper,
       usePaperGrid: true,
       width: 240,
-      height: 600,
-
+      height: "100%",
       groups: {
         equipment: { index: 1, label: "Equipment" },
         valves: { index: 2, label: "Valves" },
@@ -1262,7 +1275,7 @@ const NewDiagTest = () => {
       groupsToggleButtons: true,
       layout: {
         columns: 1,
-        marginX: 10,
+        marginX: 50,
         marginY: 10,
         columnGap: 10,
         rowGap: 10,
@@ -1526,11 +1539,11 @@ const NewDiagTest = () => {
       position: { x: 70, y: 300 },
     });
 
-    // const HeatPump01 = new HeatPump({
-    //   // position: { x: 100, y: 300 },
-    // });
+    const HeatPump01 = new HeatPump({
+      // position: { x: 100, y: 300 },
+    });
 
-    // HeatPump01.addTo(graph);
+    HeatPump01.addTo(graph);
 
     // When the tank level changes, update the panel level and color.
     panel1.listenTo(tank1, "change:level", (_, level) => {
@@ -2103,7 +2116,89 @@ const NewDiagTest = () => {
     };
   }, []);
 
+  const toolbarItems = [
+    { icon: <CodeIcon />, label: "Select", id: "select" },
+    { icon: <BuildIcon />, label: "Pan", id: "pan" },
+    { icon: <VisibilityIcon />, label: "Zoom", id: "zoom" },
+    { icon: <SaveIcon />, label: "Save", id: "save" },
+    { icon: <DownloadIcon />, label: "Export", id: "export" },
+    { icon: <UploadIcon />, label: "Import", id: "import" },
+    { icon: <RefreshIcon />, label: "Reset", id: "reset" },
+    { icon: <ZoomInIcon />, label: "Zoom In", id: "zoomIn" },
+    { icon: <ZoomOutIcon />, label: "Zoom Out", id: "zoomOut" },
+    { icon: <CenterIcon />, label: "Center", id: "center" },
+  ];
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [logsDrawerOpen, setLogsDrawerOpen] = useState(true);
+  const [selectedTool, setSelectedTool] = useState("select");
+
+  const drawerWidth = 280;
+  const logsDrawerWidth = 350;
+
+  const getLogIcon = (type) => {
+    switch (type) {
+      case "success":
+        return <CheckCircleIcon color="success" />;
+      case "warning":
+        return <WarningIcon color="warning" />;
+      case "error":
+        return <ErrorIcon color="error" />;
+      default:
+        return <InfoIcon color="primary" />;
+    }
+  };
+
+  const getLogColor = (type) => {
+    switch (type) {
+      case "success":
+        return "success";
+      case "warning":
+        return "warning";
+      case "error":
+        return "error";
+      default:
+        return "primary";
+    }
+  };
+
   return (
+    // <div
+    //   className="jointjs-container"
+    //   style={{ display: "flex", height: "100vh" }}
+    // >
+    //   <div
+    //     ref={stencilContainerRef}
+    //     id="stencil"
+    //     style={{ width: 170, borderRight: "1px solid #eee" }}
+    //   />
+    //   <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    //     <div
+    //       ref={toolbarContainerRef}
+    //       id="toolbar"
+    //       style={{ height: 50, borderBottom: "1px solid #eee" }}
+    //     />
+    //     <div style={{ display: "flex", flex: 1 }}>
+    //       <div
+    //         ref={canvas}
+    //         id="paper"
+    //         style={{ flex: 1, background: "#F5F5F5" }}
+    //       />
+    //     </div>
+    //     <div
+    //       id="logs-container"
+    //       ref={logsContainerRef}
+    //       className="w-1/4 h-full overflow-auto p-4 bg-white border-l border-gray-200"
+    //     >
+    //       {logs.map((log, index) => (
+    //         <div key={index}>
+    //           <div className="log-event text-sm font-bold">{log.event}</div>
+    //           <div className="log-text text-sm mb-2">{log.text}</div>
+    //         </div>
+    //       ))}
+    //     </div>
+    //   </div>
+    // </div>
     // <div className="canvas" ref={canvas} />
     // <div style={{ width: "100%", height: "100%" }}>
     //   <div ref={toolbarContainerRef} />
@@ -2128,42 +2223,305 @@ const NewDiagTest = () => {
     //     />
     //   </div>
     // </div>
-    <div
-      className="jointjs-container"
-      style={{ display: "flex", height: "100vh" }}
-    >
-      <div
-        ref={stencilContainerRef}
-        id="stencil"
-        style={{ width: 170, borderRight: "1px solid #eee" }}
-      />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-        <div
-          ref={toolbarContainerRef}
-          id="toolbar"
-          style={{ height: 50, borderBottom: "1px solid #eee" }}
-        />
-        <div style={{ display: "flex", flex: 1 }}>
-          <div
-            ref={canvas}
-            id="paper"
-            style={{ flex: 1, background: "#F5F5F5" }}
-          />
-        </div>
-        <div
-          id="logs-container"
-          ref={logsContainerRef}
-          className="w-1/4 h-full overflow-auto p-4 bg-white border-l border-gray-200"
+
+    //old one
+
+    //
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ display: "flex", height: "100vh" }}>
+        {/* Main App Bar */}
+        <AppBar
+          position="fixed"
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            background: "linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)",
+          }}
         >
-          {logs.map((log, index) => (
-            <div key={index}>
-              <div className="log-event text-sm font-bold">{log.event}</div>
-              <div className="log-text text-sm mb-2">{log.text}</div>
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={() => setDrawerOpen(!drawerOpen)}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <TimelineIcon sx={{ mr: 2 }} />
+            {/* <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              sx={{ flexGrow: 1 }}
+            >
+              JointJS Designer
+            </Typography> */}
+            <Badge badgeContent={logs.length} color="secondary">
+              <IconButton
+                color="inherit"
+                onClick={() => setLogsDrawerOpen(!logsDrawerOpen)}
+              >
+                <BugReportIcon />
+              </IconButton>
+            </Badge>
+          </Toolbar>
+        </AppBar>
+
+        {/* Stencil Drawer */}
+        <Drawer
+          variant="persistent"
+          anchor="left"
+          open={drawerOpen}
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              boxSizing: "border-box",
+              background: "linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)",
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ overflow: "auto" }}>
+            <Typography
+              variant="h6"
+              sx={{ p: 2, fontWeight: "bold", color: "primary.main" }}
+            >
+              Element Stencil
+            </Typography>
+            <Divider />
+            <div
+              ref={stencilContainerRef}
+              id="stencil"
+              style={{ padding: "16px" }}
+            >
+              <Grid container spacing={2}>
+                {[
+                  "Rectangle",
+                  "Circle",
+                  "Diamond",
+                  "Ellipse",
+                  "Polygon",
+                  "Text",
+                ].map((shape) => (
+                  <Grid item xs={6} key={shape}>
+                    <Card
+                      sx={{
+                        cursor: "pointer",
+                        transition: "all 0.3s ease",
+                        "&:hover": {
+                          transform: "translateY(-2px)",
+                          boxShadow: 4,
+                        },
+                      }}
+                    >
+                      <CardContent sx={{ p: 2, textAlign: "center" }}>
+                        <Avatar
+                          sx={{ mx: "auto", mb: 1, bgcolor: "primary.light" }}
+                        >
+                          {shape[0]}
+                        </Avatar>
+                        <Typography variant="caption" display="block">
+                          {shape}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          </Box>
+        </Drawer>
+
+        {/* Main Content */}
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            display: "flex",
+            flexDirection: "column",
+            ml: drawerOpen ? 0 : `-${drawerWidth}px`,
+            mr: logsDrawerOpen ? 0 : `-${logsDrawerWidth}px`,
+            transition: "margin 0.3s ease",
+          }}
+        >
+          <Toolbar />
+
+          {/* Toolbar */}
+          <Paper
+            elevation={2}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              p: 1,
+              m: 1,
+              borderRadius: 2,
+              background: "linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%)",
+            }}
+          >
+            <div
+              ref={toolbarContainerRef}
+              id="toolbar"
+              style={{ display: "flex", gap: "8px" }}
+            >
+              {toolbarItems.map((item) => (
+                <Tooltip key={item.id} title={item.label} arrow>
+                  <IconButton
+                    onClick={() => setSelectedTool(item.id)}
+                    color={selectedTool === item.id ? "primary" : "default"}
+                    sx={{
+                      border: selectedTool === item.id ? 2 : 1,
+                      borderColor:
+                        selectedTool === item.id ? "primary.main" : "divider",
+                      "&:hover": {
+                        background: "primary.light",
+                        color: "white",
+                      },
+                    }}
+                  >
+                    {item.icon}
+                  </IconButton>
+                </Tooltip>
+              ))}
+            </div>
+          </Paper>
+
+          {/* Canvas */}
+          <Box sx={{ flex: 1, m: 1, position: "relative" }}>
+            <Paper
+              elevation={3}
+              sx={{
+                height: "100%",
+                borderRadius: 2,
+                overflow: "hidden",
+                background: "linear-gradient(45deg, #ffffff 0%, #f8f9fa 100%)",
+              }}
+            >
+              <div
+                ref={canvas}
+                id="paper"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background:
+                    "repeating-linear-gradient(0deg, transparent, transparent 20px, #f0f0f0 20px, #f0f0f0 21px), repeating-linear-gradient(90deg, transparent, transparent 20px, #f0f0f0 20px, #f0f0f0 21px)",
+                }}
+              />
+            </Paper>
+          </Box>
+        </Box>
+
+        {/* Logs Drawer */}
+        <Drawer
+          variant="persistent"
+          anchor="right"
+          open={logsDrawerOpen}
+          sx={{
+            width: logsDrawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: logsDrawerWidth,
+              boxSizing: "border-box",
+              background: "linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%)",
+            },
+          }}
+        >
+          <Toolbar />
+          <Box sx={{ overflow: "auto" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                p: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: "bold", color: "primary.main" }}
+              >
+                Activity Logs
+              </Typography>
+              <IconButton onClick={() => setLogsDrawerOpen(false)} size="small">
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Divider />
+            <div
+              ref={logsContainerRef}
+              id="logs-container"
+              style={{ padding: "16px" }}
+            >
+              <List>
+                {logs.map((log, index) => (
+                  <React.Fragment key={index}>
+                    <ListItem alignItems="flex-start">
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          width: "100%",
+                        }}
+                      >
+                        <Box sx={{ mr: 2, mt: 0.5 }}>
+                          {getLogIcon(log.type)}
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              mb: 1,
+                            }}
+                          >
+                            <Chip
+                              label={log.event}
+                              color={getLogColor(log.type)}
+                              size="small"
+                              sx={{ mr: 1 }}
+                            />
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {log.timestamp}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" color="text.secondary">
+                            {log.text}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </ListItem>
+                    {index < logs.length - 1 && (
+                      <Divider variant="inset" component="li" />
+                    )}
+                  </React.Fragment>
+                ))}
+              </List>
+            </div>
+          </Box>
+        </Drawer>
+
+        {/* Floating Action Button */}
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{
+            position: "fixed",
+            bottom: 16,
+            right: logsDrawerOpen ? logsDrawerWidth + 16 : 16,
+            background: "linear-gradient(45deg, #1976d2 30%, #42a5f5 90%)",
+            transition: "right 0.3s ease",
+          }}
+        >
+          <CodeIcon />
+        </Fab>
+      </Box>
+    </ThemeProvider>
   );
 };
 

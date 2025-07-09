@@ -1267,7 +1267,7 @@ const Scada_02: React.FC = () => {
       "playback-rate"
     );
 
-    paperRef.current.scale(4);
+    paperRef.current.scale(2);
     setPlaybackRate(4);
 
     graphRef.current.on("change:power", (el) =>

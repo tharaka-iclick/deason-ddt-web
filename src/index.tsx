@@ -20,6 +20,9 @@ import NewDiagram from "./components/NewDiagram";
 import NewDiagTest from "./components/NewDiagTest";
 import NewStencilDiag from "./components/NewStencilDiag";
 import PumpComponent from "./components/PumpComponent";
+import SVGComponent from "./DDTWidget/SvgHeatPump";
+import ToolbarCanvasLayout from "./components/ToolbarCanvasLayout";
+import SpecialAttributesComponent from "./components/CustomJSX/SpecialAttributesComponent";
 
 const container = document.getElementById("root");
 const root = createRoot(container!);
@@ -28,6 +31,8 @@ root.render(
   <React.StrictMode>
     {/* <CircuitSimulator /> */}
     <NewDiagTest />
+    {/* <Scada_02 /> */}
+    {/* <SpecialAttributesComponent /> */}
     {/* <svg width="300" height="300">
       <Generator
         x={50}
