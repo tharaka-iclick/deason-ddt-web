@@ -339,7 +339,7 @@ export class TemplateImage extends dia.Element {
             position: {
               name: "line",
               args: {
-                start: { x: "calc(w)", y: 20 },
+                start: { x: "calc(w)", y: "calc(h/2 + 80)" },
                 end: { x: "calc(w)", y: 40 },
               },
             },
@@ -408,8 +408,8 @@ export class TemplateImage extends dia.Element {
             position: {
               name: "line",
               args: {
-                start: { x: "calc(w)", y: 60 },
-                end: { x: "calc(w)", y: 80 },
+                start: { x: "calc(w)", y: "calc(h/2)" },
+                end: { x: "calc(w)", y: 40 },
               },
             },
             size: { width: 30, height: 30 },
@@ -1148,7 +1148,7 @@ const NewDiagTest = () => {
       const images = [
         image
           .clone()
-          .resize(300, 300)
+          .resize(250, 250)
           .position(x, y + 230),
       ];
       graph.addCells(images);
@@ -1270,15 +1270,15 @@ const NewDiagTest = () => {
         "*": ["type", "attrs/label/text"],
         enabled: true,
         placeholder: "Search elements...",
-        width: 220,
+        width: 250,
       },
       groupsToggleButtons: true,
       layout: {
         columns: 1,
         marginX: 50,
-        marginY: 10,
+        marginY: 50,
         columnGap: 10,
-        rowGap: 10,
+        rowGap: 70,
       },
       paperOptions: function () {
         return {
@@ -1319,9 +1319,9 @@ const NewDiagTest = () => {
         },
       }),
       new TemplateImage({
-        position: { x: 10, y: 10 },
+        // position: { x: 10, y: 10 },
         svg: HeatPumpSVG,
-        size: { width: 100, height: 100 },
+        size: { width: 150, height: 150 },
         // ports: {
         //   items: [
         //     { id: "in1", group: "in" },
@@ -1718,7 +1718,7 @@ const NewDiagTest = () => {
       },
     });
 
-    // tank1Pipe1.addTo(graph);
+    tank1Pipe1.addTo(graph);
 
     const tank1Pipe2 = new Pipe({
       source: {
